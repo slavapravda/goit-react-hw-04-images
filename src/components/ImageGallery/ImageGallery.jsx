@@ -20,7 +20,7 @@ const ImageGallery = ({ onLoadMoreBtnClick, page, searchName }) => {
     if (searchName) {
       getMoreImages();
     }
-    
+
     async function getMoreImages() {
       setLoading(true);
 
@@ -33,6 +33,7 @@ const ImageGallery = ({ onLoadMoreBtnClick, page, searchName }) => {
         setLoading(false);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchName]);
 
   useEffect(() => {
@@ -52,6 +53,7 @@ const ImageGallery = ({ onLoadMoreBtnClick, page, searchName }) => {
         setLoading(false);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   const openModal = largeImg => {

@@ -16,6 +16,7 @@ const Modal = ({ url, onClick }) => {
     return () => {
       document.removeEventListener('keydown', closeModal);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
