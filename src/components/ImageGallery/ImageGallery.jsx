@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
@@ -10,84 +10,79 @@ import searchImg from '../api/searchApi';
 
 import s from './ImageGallery.module.css';
 
-class ImageGallery extends Component {
-  state = {
-    image: [],
-    loading: false,
-    error: null,
-    showBtn: false,
-    largeImg: '',
-    openModal: false,
-  };
+const ImageGallery = ({ onLoadMoreBtnClick, page, searchName }) => {
+  const [image, setImage] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [largeImg, setLargeImg] = useState('');
 
-  componentDidUpdate(prevProps, prevState) {
-    const { page } = this.props;
+  useEffect(() => {
+    if (searchName) {
+      getMoreImages();
+    }
+    
+    async function getMoreImages() {
+      setLoading(true);
 
-    const prevName = prevProps.searchName;
-    const nextName = this.props.searchName;
+      try {
+        const data = await searchImg(searchName, page);
+        setImage([...data.hits]);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  }, [searchName]);
 
-    if (prevName !== nextName) {
-      this.setState({ loading: true, image: [], showBtn: false });
-
-      searchImg(nextName, page)
-        .then(data => data.hits)
-        .then(image =>
-          this.setState({
-            image: [...image],
-          })
-        )
-        .catch(error => this.setState({ error }))
-        .finally(() => this.setState({ loading: false, showBtn: true }));
+  useEffect(() => {
+    if (page > 1) {
+      getMoreImages();
     }
 
-    if (page > prevProps.page && page > 1) {
-      this.setState({ loading: true });
+    async function getMoreImages() {
+      setLoading(true);
 
-      searchImg(nextName, page)
-        .then(data => data.hits)
-        .then(image =>
-          this.setState(prevState => ({
-            image: [...prevState.image, ...image],
-          }))
-        )
-        .catch(error => this.setState({ error }))
-        .finally(() => this.setState({ loading: false, showBtn: true }));
+      try {
+        const data = await searchImg(searchName, page);
+        setImage(prevImages => [...prevImages, ...data.hits]);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
     }
-  }
+  }, [page]);
 
-  openModal = largeImg => {
-    this.setState({ largeImg });
+  const openModal = largeImg => {
+    setLargeImg(largeImg);
   };
 
-  render() {
-    const { loading, image, error, showBtn, largeImg } = this.state;
-    const { openModal } = this;
-    const { onLoadMoreBtnClick } = this.props;
+  const isImages = Boolean(image.length);
 
-    return (
-      <>
-        {largeImg && <Modal onClick={openModal} url={largeImg} />}
-        {error && <h1>{error.message}</h1>}
-        {loading && <Loader />}
-        {image && (
-          <ul className={s.imageGallery}>
-            {image.map(({ id, webformatURL, largeImageURL, tags }) => (
-              <ImageGalleryItem
-                smallImg={webformatURL}
-                largeImg={largeImageURL}
-                alt={tags}
-                id={id}
-                key={id}
-                onClickImg={openModal}
-              />
-            ))}
-          </ul>
-        )}
-        {showBtn && <Button onClick={onLoadMoreBtnClick} />}
-      </>
-    );
-  }
-}
+  return (
+    <>
+      {largeImg && <Modal onClick={openModal} url={largeImg} />}
+      {error && <h1>{error.message}</h1>}
+      {loading && <Loader />}
+      {image && (
+        <ul className={s.imageGallery}>
+          {image.map(({ id, webformatURL, largeImageURL, tags }) => (
+            <ImageGalleryItem
+              smallImg={webformatURL}
+              largeImg={largeImageURL}
+              alt={tags}
+              id={id}
+              key={id}
+              onClickImg={openModal}
+            />
+          ))}
+        </ul>
+      )}
+      {isImages && <Button onClick={onLoadMoreBtnClick} />}
+    </>
+  );
+};
 
 export default ImageGallery;
 
