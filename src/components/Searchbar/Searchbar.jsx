@@ -25,7 +25,6 @@ const Searchbar = (props) => {
     props.onSubmit({searchName});
 
     // reset()
-    setName('');
   };
   // const reset = () => {
   //   setName('')

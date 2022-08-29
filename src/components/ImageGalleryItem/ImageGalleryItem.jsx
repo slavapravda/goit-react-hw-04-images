@@ -20,6 +20,7 @@ const ImageGalleryItem = ({ id, smallImg, largeImg, alt, onClickImg }) => {
   );
 };
 
+
 export default ImageGalleryItem;
 
 ImageGalleryItem.propTypes = {
